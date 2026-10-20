@@ -85,25 +85,55 @@ export function initContact() {
     if (btnText) btnText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
 
     try {
-      // Simulate network request or dispatch
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const accessKey = import.meta.env?.VITE_WEB3FORMS_ACCESS_KEY;
 
-      showToast(
-        'success',
-        'Message Sent Successfully!',
-        'Thank you for reaching out, Muhammad Bilal Javed will get back to you shortly.'
-      );
+      if (!accessKey) {
+        showToast(
+          'error',
+          'Setup Required',
+          'Please configure VITE_WEB3FORMS_ACCESS_KEY in your .env file to receive emails.'
+        );
+        return;
+      }
 
-      form.reset();
-      [nameInput, emailInput, messageInput].forEach((input) => {
-        input?.classList.remove('input-valid', 'input-error');
-        input?.removeAttribute('aria-invalid');
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          access_key: accessKey,
+          name: nameInput.value.trim(),
+          email: emailInput.value.trim(),
+          message: messageInput.value.trim(),
+          subject: `Portfolio Message from ${nameInput.value.trim()}`,
+          from_name: nameInput.value.trim(),
+        }),
       });
-      [nameError, emailError, messageError].forEach((el) => {
-        if (el) el.textContent = '';
-      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showToast(
+          'success',
+          'Message Sent Successfully!',
+          'Thank you for reaching out, Muhammad Bilal Javed will get back to you shortly.'
+        );
+
+        form.reset();
+        [nameInput, emailInput, messageInput].forEach((input) => {
+          input?.classList.remove('input-valid', 'input-error');
+          input?.removeAttribute('aria-invalid');
+        });
+        [nameError, emailError, messageError].forEach((el) => {
+          if (el) el.textContent = '';
+        });
+      } else {
+        throw new Error(data.message || 'Failed to send message.');
+      }
     } catch (err) {
-      showToast('error', 'Transmission Failed', 'Something went wrong. Please email directly at bilaljavedd056@gmail.com');
+      showToast('error', 'Transmission Failed', err.message || 'Something went wrong. Please email directly at bilaljavedd056@gmail.com');
     } finally {
       if (submitBtn) submitBtn.disabled = false;
       if (btnText) btnText.textContent = originalText;

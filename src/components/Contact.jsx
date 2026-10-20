@@ -78,23 +78,53 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      // Simulate network request
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
 
-      showToast(
-        'success',
-        'Message Sent Successfully!',
-        'Thank you for reaching out, Muhammad Bilal Javed will get back to you shortly.'
-      );
+      if (!accessKey) {
+        showToast(
+          'error',
+          'Setup Required',
+          'Please configure VITE_WEB3FORMS_ACCESS_KEY in your .env file to receive emails.'
+        );
+        return;
+      }
 
-      setFormData({ name: '', email: '', message: '' });
-      setTouched({ name: false, email: false, message: false });
-      setErrors({ name: '', email: '', message: '' });
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          access_key: accessKey,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          message: formData.message.trim(),
+          subject: `Portfolio Message from ${formData.name.trim()}`,
+          from_name: formData.name.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showToast(
+          'success',
+          'Message Sent Successfully!',
+          'Thank you for reaching out, Muhammad Bilal Javed will get back to you shortly.'
+        );
+
+        setFormData({ name: '', email: '', message: '' });
+        setTouched({ name: false, email: false, message: false });
+        setErrors({ name: '', email: '', message: '' });
+      } else {
+        throw new Error(data.message || 'Failed to send message.');
+      }
     } catch (err) {
       showToast(
         'error',
         'Transmission Failed',
-        'Something went wrong. Please email directly at bilaljavedd056@gmail.com'
+        err.message || 'Something went wrong. Please email directly at bilaljavedd056@gmail.com'
       );
     } finally {
       setIsSubmitting(false);

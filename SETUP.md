@@ -55,7 +55,25 @@ The "Download CV" button in the Hero section is powered by **Firebase Storage**.
    VITE_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
    VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
    VITE_FIREBASE_APP_ID=1:123456789012:web:...
+   VITE_WEB3FORMS_ACCESS_KEY=your_web3forms_access_key
    ```
+
+---
+
+## 📬 Contact Form Email Setup (Web3Forms)
+
+The Contact Form sends messages directly to your Gmail (`bilaljavedd056@gmail.com`) via **Web3Forms**:
+
+1. Go to [web3forms.com](https://web3forms.com/).
+2. Enter your Gmail address (`bilaljavedd056@gmail.com`) and click **Create Your Access Key**.
+3. You will immediately receive your free **Access Key** in your Gmail inbox.
+4. Open your `.env` file and set:
+   ```env
+   VITE_WEB3FORMS_ACCESS_KEY=your_access_key_here
+   ```
+5. If deploying to **Vercel** / **Netlify**, add `VITE_WEB3FORMS_ACCESS_KEY` to the **Environment Variables** in your hosting dashboard.
+
+---
 
 ### 4. Upload your CV PDF
 1. In Firebase Console, open **Storage** from the left navigation.
