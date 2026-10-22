@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import kestralWorksImg from '../assets/images/project-kestral-works.png';
 import studentPortalImg from '../assets/images/project-student-portal.png';
 import memoryVaultImg from '../assets/images/project-memory-vault.png';
+import expenseFlowImg from '../assets/images/project-expense-flow.png';
 
 const PROJECTS = [
   {
@@ -36,10 +37,23 @@ const PROJECTS = [
   },
 ];
 
+const EXTRA_PROJECTS = [
+  {
+    title: 'Expense Flow',
+    description:
+      'Expense Flow is a smart money management application designed to help users track every dollar and grow their savings effortlessly. It provides a beautiful dashboard to monitor spending, plan budgets, and hit savings goals — all in one calm interface. The platform was built to simplify personal finance tracking with intuitive visualizations and real-time budget insights.',
+    image: expenseFlowImg,
+    tags: ['React.js', 'Node.js', 'Expense Tracker', 'MongoDB', 'REST API'],
+    github: 'https://github.com/bilal-2004-hub/Expense-Flow',
+    live: 'https://expense-flow-client-nine.vercel.app/',
+    featured: false,
+  },
+];
 
 
 export default function Projects() {
   const containerRef = useRef(null);
+  const [showMore, setShowMore] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -60,7 +74,11 @@ export default function Projects() {
     cards.forEach((card) => observer.observe(card));
 
     return () => observer.disconnect();
-  }, []);
+  }, [showMore]);
+
+  const handleToggle = () => {
+    setShowMore((prev) => !prev);
+  };
 
   return (
     <section id="projects" className="projects section" aria-labelledby="projects-heading">
@@ -120,6 +138,88 @@ export default function Projects() {
               </div>
             </article>
           ))}
+
+          {/* Show More / Plus Button */}
+          {!showMore && (
+            <button
+              className="project-show-more-btn reveal reveal-delay-1"
+              onClick={handleToggle}
+              aria-label="Show more projects"
+            >
+              <div className="show-more-inner">
+                <div className="show-more-icon">
+                  <i className="fas fa-plus" aria-hidden="true"></i>
+                </div>
+                <span className="show-more-text">More Projects</span>
+              </div>
+            </button>
+          )}
+
+          {/* Extra projects with animation */}
+          {showMore &&
+            EXTRA_PROJECTS.map((project, index) => (
+              <article
+                key={project.title}
+                className={`project-card project-card-extra reveal reveal-delay-${(index % 3) + 1}`}
+              >
+                <div className="project-img-wrapper">
+                  <img
+                    src={project.image}
+                    alt={`${project.title} interface preview`}
+                    loading="lazy"
+                    width="600"
+                    height="340"
+                  />
+                </div>
+                <div className="project-content">
+                  <h3 className="project-name">{project.title}</h3>
+                  <p className="project-description">{project.description}</p>
+                  <div className="project-tags">
+                    {project.tags.map((tag) => (
+                      <span key={tag} className="tag">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="project-buttons">
+                    <a
+                      href={project.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="project-btn project-btn-github"
+                      aria-label={`Source code for ${project.title}`}
+                    >
+                      <i className="fab fa-github" aria-hidden="true"></i> Code
+                    </a>
+                    <a
+                      href={project.live}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="project-btn project-btn-live"
+                      aria-label={`Live demo for ${project.title}`}
+                    >
+                      <i className="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> Live Demo
+                    </a>
+                  </div>
+                </div>
+              </article>
+            ))}
+
+          {/* Show Less Button */}
+          {showMore && (
+            <button
+              className="project-show-more-btn project-show-less reveal revealed"
+              onClick={handleToggle}
+              aria-label="Show less projects"
+            >
+              <div className="show-more-inner">
+                <div className="show-more-icon show-less-icon">
+                  <i className="fas fa-minus" aria-hidden="true"></i>
+                </div>
+                <span className="show-more-text">Show Less</span>
+              </div>
+            </button>
+          )}
         </div>
       </div>
     </section>
