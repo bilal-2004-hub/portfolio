@@ -1,29 +1,45 @@
 /* ============================================================
-   PROJECTS.CSS
+   PROJECTS.CSS - Slider & Horizontal Swipe System
    ============================================================ */
 
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: var(--space-8);
+.projects-slider-wrapper {
+  position: relative;
+  width: 100%;
 }
 
-/* ---- Project Card ---- */
-.project-card {
+.projects-viewport {
+  overflow: hidden;
+  width: 100%;
+  padding: 1.25rem 1.25rem 1.5rem 1.25rem;
+  margin: -1.25rem -1.25rem -1.5rem -1.25rem;
+}
+
+.projects-track {
+  display: flex;
+  gap: var(--space-8);
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* ---- Project Card in Slider Track ---- */
+.projects-track .project-card {
+  flex: 0 0 calc((100% - 2 * var(--space-8)) / 3);
+  min-width: calc((100% - 2 * var(--space-8)) / 3);
+  max-width: calc((100% - 2 * var(--space-8)) / 3);
   background: var(--clr-bg-card);
   border: 1px solid var(--clr-border);
   border-radius: var(--radius-xl);
-  overflow: hidden;
+  overflow: visible; /* so floating side buttons stay visible */
   display: flex;
   flex-direction: column;
-  transition: all var(--transition-slow);
+  transition: border-color var(--transition-slow), transform var(--transition-slow), box-shadow var(--transition-slow);
   position: relative;
 }
 
-.project-card:hover {
-  border-color: rgba(37, 99, 235, 0.4);
+.projects-track .project-card:hover {
+  border-color: rgba(37, 99, 235, 0.5);
   transform: translateY(-8px);
-  box-shadow: var(--shadow-lg), 0 0 30px rgba(37, 99, 235, 0.1);
+  box-shadow: var(--shadow-lg), 0 0 30px rgba(37, 99, 235, 0.15);
 }
 
 /* ---- Image ---- */
@@ -31,6 +47,8 @@
   position: relative;
   overflow: hidden;
   aspect-ratio: 16 / 9;
+  border-top-left-radius: var(--radius-xl);
+  border-top-right-radius: var(--radius-xl);
 }
 
 .project-img-wrapper img {
@@ -117,135 +135,202 @@
   box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
 }
 
-.project-btn.disabled {
-  opacity: 0.45;
-  pointer-events: none;
-  cursor: not-allowed;
-}
-
-
-/* ---- Show More / Plus Card Button ---- */
-.project-show-more-btn {
-  background: var(--clr-bg-card);
-  border: 2px dashed rgba(37, 99, 235, 0.35);
-  border-radius: var(--radius-xl);
-  min-height: 380px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  color: var(--clr-text-muted);
-  padding: var(--space-6);
-  position: relative;
-  overflow: hidden;
-}
-
-.project-show-more-btn::before {
-  content: '';
+/* ---- Floating Plus & Minus Swipe Buttons ---- */
+.project-swipe-btn {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(37, 99, 235, 0.12) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity var(--transition-base);
-}
-
-.project-show-more-btn:hover {
-  border-color: var(--clr-primary-500);
-  transform: translateY(-6px);
-  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.2);
-  color: var(--clr-heading);
-}
-
-.project-show-more-btn:hover::before {
-  opacity: 1;
-}
-
-.show-more-inner {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-4);
-  position: relative;
-  z-index: 1;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  z-index: 30;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
-.show-more-icon {
-  width: 64px;
-  height: 64px;
+.swipe-btn-hint {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 1px;
+}
+
+/* Plus button on right edge of 3rd project */
+.project-swipe-btn.project-plus-btn {
+  right: -24px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  box-shadow: 0 6px 22px rgba(37, 99, 235, 0.6);
+  animation: floatPulse 3s ease-in-out infinite;
+}
+
+.project-swipe-btn.project-plus-btn:hover {
+  transform: translateY(-50%) scale(1.15);
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  box-shadow: 0 8px 30px rgba(37, 99, 235, 0.85);
+}
+
+.plus-btn-ping {
+  position: absolute;
+  inset: -6px;
   border-radius: 50%;
-  background: rgba(37, 99, 235, 0.12);
-  border: 1px solid rgba(37, 99, 235, 0.3);
+  border: 2px solid rgba(59, 130, 246, 0.6);
+  animation: pingAnimation 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes pingAnimation {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  75%, 100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes floatPulse {
+  0%, 100% {
+    box-shadow: 0 6px 22px rgba(37, 99, 235, 0.6);
+  }
+  50% {
+    box-shadow: 0 6px 30px rgba(37, 99, 235, 0.9), 0 0 15px rgba(59, 130, 246, 0.5);
+  }
+}
+
+/* Minus button on left edge of 4th project */
+.project-swipe-btn.project-minus-btn {
+  left: -24px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff;
+  box-shadow: 0 6px 22px rgba(239, 68, 68, 0.6);
+}
+
+.project-swipe-btn.project-minus-btn:hover {
+  transform: translateY(-50%) scale(1.15);
+  background: linear-gradient(135deg, #f87171, #ef4444);
+  box-shadow: 0 8px 30px rgba(239, 68, 68, 0.85);
+}
+
+/* Card Top-Right Minus Button (on 4th project) */
+.project-card-minus-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(239, 68, 68, 0.6);
+  color: #f87171;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  color: var(--clr-primary-400);
+  font-size: 0.95rem;
+  cursor: pointer;
+  z-index: 25;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.project-card-minus-btn:hover {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+}
+
+/* ---- Bottom Navigation Bar ---- */
+.projects-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+
+.nav-swipe-pill {
+  background: var(--clr-bg-card);
+  border: 1px solid var(--clr-border);
+  color: var(--clr-text-muted);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
   transition: all var(--transition-base);
 }
 
-.project-show-more-btn:hover .show-more-icon {
-  background: var(--clr-primary-600);
-  color: #fff;
-  transform: scale(1.1) rotate(90deg);
-  box-shadow: 0 0 20px rgba(37, 99, 235, 0.5);
+.nav-swipe-pill:hover {
+  color: var(--clr-heading);
+  border-color: rgba(37, 99, 235, 0.4);
+  background: rgba(37, 99, 235, 0.08);
+  transform: translateY(-2px);
 }
 
-.show-more-icon.show-less-icon {
-  color: #f43f5e;
-  background: rgba(244, 63, 94, 0.1);
-  border-color: rgba(244, 63, 94, 0.3);
+.nav-swipe-pill.active {
+  background: rgba(37, 99, 235, 0.15);
+  border-color: var(--clr-primary-500);
+  color: var(--clr-primary-400);
 }
 
-.project-show-less:hover .show-more-icon.show-less-icon {
-  background: #f43f5e;
-  color: #fff;
-  transform: scale(1.1);
-  box-shadow: 0 0 20px rgba(244, 63, 94, 0.5);
+.nav-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.project-show-less {
-  border-color: rgba(244, 63, 94, 0.3);
+.nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--clr-border);
+  transition: all var(--transition-base);
 }
 
-.project-show-less:hover {
-  border-color: #f43f5e;
-  box-shadow: 0 10px 25px -5px rgba(244, 63, 94, 0.2);
-}
-
-.show-more-text {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.project-card-extra {
-  animation: projectFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes projectFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.nav-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: var(--clr-primary-500);
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
 }
 
 /* ---- Responsive ---- */
-@media (max-width: 768px) {
-  .projects-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 1024px) {
+  .projects-track {
+    gap: var(--space-6);
   }
-  .project-show-more-btn {
-    min-height: 180px;
+  .projects-track .project-card {
+    flex: 0 0 calc((100% - var(--space-6)) / 2);
+    min-width: calc((100% - var(--space-6)) / 2);
+    max-width: calc((100% - var(--space-6)) / 2);
   }
 }
 
-@media (max-width: 480px) {
-  .project-content { padding: var(--space-5); }
-  .project-buttons { flex-direction: column; }
+@media (max-width: 640px) {
+  .projects-track .project-card {
+    flex: 0 0 100%;
+    min-width: 100%;
+    max-width: 100%;
+  }
+  .project-content {
+    padding: var(--space-5);
+  }
+  .project-buttons {
+    flex-direction: column;
+  }
 }
 
