@@ -308,8 +308,13 @@
   box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
 }
 
+/* Mobile Show More Button (hidden on desktop) */
+.mobile-show-more-wrapper {
+  display: none;
+}
+
 /* ---- Responsive ---- */
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 769px) {
   .projects-track {
     gap: var(--space-6);
   }
@@ -320,17 +325,96 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .projects-viewport {
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+  }
+
+  .projects-track {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    transform: none !important;
+  }
+
   .projects-track .project-card {
     flex: 0 0 100%;
     min-width: 100%;
     max-width: 100%;
+    transform: none;
   }
+
+  .projects-track .project-card:hover {
+    transform: translateY(-4px);
+  }
+
   .project-content {
     padding: var(--space-5);
   }
+
   .project-buttons {
     flex-direction: column;
+  }
+
+  /* On mobile, hide the 4th project when not expanded */
+  .projects-track .project-card.project-card-extra-mobile {
+    display: none;
+  }
+
+  .projects-track .project-card.project-card-extra-mobile.is-visible {
+    display: flex;
+    animation: projectFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Hide floating swipe side buttons and desktop nav pill on mobile */
+  .project-swipe-btn,
+  .project-card-minus-btn,
+  .projects-nav-bar {
+    display: none !important;
+  }
+
+  /* Show mobile show more button */
+  .mobile-show-more-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-8);
+  }
+
+  .mobile-show-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0.75rem 2rem;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--clr-primary-300);
+    background: rgba(37, 99, 235, 0.12);
+    border: 1.5px solid rgba(37, 99, 235, 0.35);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .mobile-show-more-btn:hover {
+    background: rgba(37, 99, 235, 0.22);
+    border-color: var(--clr-primary-500);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+  }
+}
+
+@keyframes projectFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

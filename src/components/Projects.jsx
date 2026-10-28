@@ -57,14 +57,16 @@ export default function Projects() {
   const firstCardRef = useRef(null);
   const [isSwiped, setIsSwiped] = useState(false);
   const [cardShift, setCardShift] = useState(0);
+  const [showMoreMobile, setShowMoreMobile] = useState(false);
 
   useEffect(() => {
     const updateDimensions = () => {
-      if (firstCardRef.current && trackRef.current) {
+      if (firstCardRef.current && trackRef.current && containerRef.current) {
         const cardWidth = firstCardRef.current.getBoundingClientRect().width;
         const computedStyle = window.getComputedStyle(trackRef.current);
         const gap = parseFloat(computedStyle.gap) || 32;
-        setCardShift(cardWidth + gap);
+        const maxShift = trackRef.current.scrollWidth - containerRef.current.clientWidth;
+        setCardShift(maxShift > 0 ? maxShift : cardWidth + gap);
       }
     };
 
@@ -81,7 +83,6 @@ export default function Projects() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('revealed');
-            observer.unobserve(entry.target);
           }
         });
       },
@@ -92,7 +93,7 @@ export default function Projects() {
     cards.forEach((card) => observer.observe(card));
 
     return () => observer.disconnect();
-  }, []);
+  }, [isSwiped, showMoreMobile]);
 
   return (
     <section id="projects" className="projects section" aria-labelledby="projects-heading">
@@ -114,99 +115,116 @@ export default function Projects() {
                 transform: isSwiped ? `translateX(-${cardShift}px)` : 'translateX(0px)',
               }}
             >
-              {PROJECTS.map((project, index) => (
-                <article
-                  key={project.id || project.title}
-                  ref={index === 0 ? firstCardRef : null}
-                  className={`project-card reveal reveal-delay-${(index % 3) + 1} ${
-                    index === 3 ? 'project-card-4' : ''
-                  }`}
-                >
-                  {/* Top-Right Minus Button on 4th Project */}
-                  {index === 3 && (
-                    <button
-                      type="button"
-                      className="project-card-minus-btn"
-                      onClick={() => setIsSwiped(false)}
-                      title="Swipe Back"
-                      aria-label="Close 4th project"
-                    >
-                      <i className="fas fa-minus" aria-hidden="true"></i>
-                    </button>
-                  )}
-
-                  {/* Left Floating Minus Button on 4th Project */}
-                  {index === 3 && isSwiped && (
-                    <button
-                      type="button"
-                      className="project-swipe-btn project-minus-btn"
-                      onClick={() => setIsSwiped(false)}
-                      title="Swipe Back to Previous Projects"
-                      aria-label="Swipe back"
-                    >
-                      <i className="fas fa-minus" aria-hidden="true"></i>
-                      <span className="swipe-btn-hint">Back</span>
-                    </button>
-                  )}
-
-                  {/* Right Floating Plus Button on 3rd Project */}
-                  {index === 2 && !isSwiped && (
-                    <button
-                      type="button"
-                      className="project-swipe-btn project-plus-btn"
-                      onClick={() => setIsSwiped(true)}
-                      title="Swipe Right for Expense Flow"
-                      aria-label="Swipe right for next project"
-                    >
-                      <i className="fas fa-plus" aria-hidden="true"></i>
-                      <span className="swipe-btn-hint">More</span>
-                      <span className="plus-btn-ping" aria-hidden="true"></span>
-                    </button>
-                  )}
-
-                  <div className="project-img-wrapper">
-                    <img
-                      src={project.image}
-                      alt={`${project.title} interface preview`}
-                      loading="lazy"
-                      width="600"
-                      height="340"
-                    />
-                  </div>
-                  <div className="project-content">
-                    <h3 className="project-name">{project.title}</h3>
-                    <p className="project-description">{project.description}</p>
-                    <div className="project-tags">
-                      {project.tags.map((tag) => (
-                        <span key={tag} className="tag">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="project-buttons">
-                      <a
-                        href={project.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="project-btn project-btn-github"
-                        aria-label={`Source code for ${project.title}`}
+              {PROJECTS.map((project, index) => {
+                const isExtra = index === 3;
+                return (
+                  <article
+                    key={project.id || project.title}
+                    ref={index === 0 ? firstCardRef : null}
+                    className={`project-card reveal reveal-delay-${(index % 3) + 1} ${
+                      isExtra ? 'project-card-4 project-card-extra-mobile' : ''
+                    } ${isExtra && showMoreMobile ? 'is-visible' : ''}`}
+                  >
+                    {/* Top-Right Minus Button on 4th Project */}
+                    {index === 3 && (
+                      <button
+                        type="button"
+                        className="project-card-minus-btn"
+                        onClick={() => setIsSwiped(false)}
+                        title="Swipe Back"
+                        aria-label="Close 4th project"
                       >
-                        <i className="fab fa-github" aria-hidden="true"></i> Code
-                      </a>
-                      <a
-                        href={project.live}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="project-btn project-btn-live"
-                        aria-label={`Live demo for ${project.title}`}
+                        <i className="fas fa-minus" aria-hidden="true"></i>
+                      </button>
+                    )}
+
+                    {/* Left Floating Minus Button on 4th Project */}
+                    {index === 3 && isSwiped && (
+                      <button
+                        type="button"
+                        className="project-swipe-btn project-minus-btn"
+                        onClick={() => setIsSwiped(false)}
+                        title="Swipe Back to Previous Projects"
+                        aria-label="Swipe back"
                       >
-                        <i className="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> Live Demo
-                      </a>
+                        <i className="fas fa-minus" aria-hidden="true"></i>
+                        <span className="swipe-btn-hint">Back</span>
+                      </button>
+                    )}
+
+                    {/* Right Floating Plus Button on 3rd Project */}
+                    {index === 2 && !isSwiped && (
+                      <button
+                        type="button"
+                        className="project-swipe-btn project-plus-btn"
+                        onClick={() => setIsSwiped(true)}
+                        title="Swipe Right for Expense Flow"
+                        aria-label="Swipe right for next project"
+                      >
+                        <i className="fas fa-plus" aria-hidden="true"></i>
+                        <span className="swipe-btn-hint">More</span>
+                        <span className="plus-btn-ping" aria-hidden="true"></span>
+                      </button>
+                    )}
+
+                    <div className="project-img-wrapper">
+                      <img
+                        src={project.image}
+                        alt={`${project.title} interface preview`}
+                        loading="lazy"
+                        width="600"
+                        height="340"
+                      />
                     </div>
-                  </div>
-                </article>
-              ))}
+                    <div className="project-content">
+                      <h3 className="project-name">{project.title}</h3>
+                      <p className="project-description">{project.description}</p>
+                      <div className="project-tags">
+                        {project.tags.map((tag) => (
+                          <span key={tag} className="tag">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="project-buttons">
+                        <a
+                          href={project.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="project-btn project-btn-github"
+                          aria-label={`Source code for ${project.title}`}
+                        >
+                          <i className="fab fa-github" aria-hidden="true"></i> Code
+                        </a>
+                        <a
+                          href={project.live}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="project-btn project-btn-live"
+                          aria-label={`Live demo for ${project.title}`}
+                        >
+                          <i className="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> Live Demo
+                        </a>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
+          </div>
+
+          {/* Mobile Show More / Show Less Button */}
+          <div className="mobile-show-more-wrapper">
+            <button
+              type="button"
+              className="mobile-show-more-btn"
+              onClick={() => setShowMoreMobile((prev) => !prev)}
+              aria-expanded={showMoreMobile}
+              aria-label={showMoreMobile ? 'Show less projects' : 'Show more projects'}
+            >
+              <i className={`fas fa-${showMoreMobile ? 'minus' : 'plus'}`} aria-hidden="true"></i>
+              <span>{showMoreMobile ? 'Show Less' : 'Show More Projects'}</span>
+            </button>
           </div>
 
           {/* Navigation Controls */}

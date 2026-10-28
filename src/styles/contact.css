@@ -142,6 +142,18 @@
   font-weight: 500;
 }
 
+.contact-form #form-submit-btn,
+.contact-form .btn-full {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  margin-inline: auto;
+  text-align: center;
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 900px) {
   .contact-grid {
@@ -153,5 +165,14 @@
 @media (max-width: 480px) {
   .contact-form-wrapper {
     padding: var(--space-5);
+  }
+
+  .contact-form #form-submit-btn,
+  .contact-form .btn-full {
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+    align-items: center;
+    margin-inline: auto;
   }
 }
